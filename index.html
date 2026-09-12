@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Matematický les</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3E7C59">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap');
+
+  :root {
+    --moss: #3E7C59;
+    --moss-dark: #2C5B41;
+    --leaf: #A8D5A2;
+    --leaf-pale: #E4F3E0;
+    --sky: #5FA8D3;
+    --sky-dark: #3E7FA5;
+    --sun: #F3B23E;
+    --sun-dark: #D89426;
+    --berry: #E0574F;
+    --bark: #6B4A30;
+    --cream: #FBF6EC;
+    --ink: #33301F;
+    --radius-card: 28px;
+    --shadow-moss: 0 14px 28px -12px rgba(44, 91, 65, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--cream);
+    font-family: 'Nunito', system-ui, sans-serif;
+    color: var(--ink);
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 12% 15%, rgba(168, 213, 162, 0.55), transparent 40%),
+      radial-gradient(circle at 88% 82%, rgba(95, 168, 211, 0.35), transparent 45%),
+      var(--cream);
+  }
+
+  h1, h2, .display-font {
+    font-family: 'Baloo 2', 'Nunito', system-ui, sans-serif;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 460px;
+    background: #ffffff;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-moss);
+    padding: 32px 28px 28px;
+    position: relative;
+    overflow: hidden;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+
+  .app::before {
+    content: "";
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 160px;
+    height: 160px;
+    background: var(--leaf-pale);
+    border-radius: 50%;
+    z-index: 0;
+  }
+
+  .app > * { position: relative; z-index: 1; }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ---- Setup screen ---- */
+
+  .mascot-row {
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  .mascot {
+    font-size: 52px;
+    display: inline-block;
+    animation: bob 2.4s ease-in-out infinite;
+  }
+
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-8px) rotate(3deg); }
+  }
+
+  h1.title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--moss-dark);
+    margin: 4px 0 6px;
+  }
+
+  h2.title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--moss-dark);
+    margin: 0 0 20px;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 15px;
+    color: #6b6552;
+    margin: 0 0 24px;
+    line-height: 1.4;
+  }
+
+  .field-label {
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--moss-dark);
+    margin: 20px 0 10px;
+  }
+
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    flex: 1 1 auto;
+    min-width: 60px;
+    padding: 12px 10px;
+    border-radius: 999px;
+    border: 2px solid var(--leaf);
+    background: var(--leaf-pale);
+    color: var(--moss-dark);
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.12s ease, background 0.15s ease, color 0.15s ease;
+  }
+
+  .chip[aria-pressed="true"] {
+    background: var(--moss);
+    border-color: var(--moss);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+
+  .chip:active { transform: scale(0.96); }
+
+  .chip-mix {
+    width: 100%;
+    margin-top: 8px;
+    border-color: var(--sky);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 16px;
+  }
+
+  .chip-mix[aria-pressed="true"] {
+    background: var(--sky);
+    border-color: var(--sky-dark);
+    color: #fff;
+  }
+
+  .chip-mix .mix-symbols {
+    font-size: 14px;
+    font-weight: 400;
+    font-family: 'Nunito', sans-serif;
+    letter-spacing: 3px;
+    opacity: 0.85;
+  }
+
+  .toggle-row {
+    display: flex;
+    background: var(--leaf-pale);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .toggle-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 12px 8px;
+    border-radius: 999px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--moss-dark);
+    cursor: pointer;
+  }
+
+  .toggle-btn[aria-pressed="true"] {
+    background: var(--sun);
+    color: var(--moss-dark);
+    box-shadow: 0 6px 14px -6px rgba(216, 148, 38, 0.6);
+  }
+
+  .primary-btn {
+    display: block;
+    width: 100%;
+    margin-top: 28px;
+    padding: 16px;
+    border: none;
+    border-radius: 18px;
+    background: var(--moss);
+    color: #fff;
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    box-shadow: var(--shadow-moss);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  .primary-btn:hover { transform: translateY(-2px); }
+  .primary-btn:active { transform: translateY(0); box-shadow: none; }
+
+  .secondary-btn {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 13px;
+    border: 2px solid var(--leaf);
+    border-radius: 18px;
+    background: #fff;
+    color: var(--moss-dark);
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .hint {
+    text-align: center;
+    font-size: 13px;
+    color: #928c73;
+    margin-top: 10px;
+  }
+
+  /* ---- Practice screen ---- */
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 800;
+    color: var(--moss-dark);
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+
+  .acorn-track {
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+    max-width: 200px;
+    justify-content: flex-end;
+  }
+
+  .acorn-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--leaf);
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+
+  .acorn-dot.correct { background: var(--sun); border-color: var(--sun-dark); }
+  .acorn-dot.wrong { background: var(--berry); border-color: #b8433c; }
+
+  .question-box {
+    text-align: center;
+    background: var(--leaf-pale);
+    border-radius: 22px;
+    padding: 30px 14px 26px;
+    margin: 6px 0 18px;
+  }
+
+  .question-text {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--moss-dark);
+    letter-spacing: 1px;
+  }
+
+  .answer-input {
+    width: 100%;
+    text-align: center;
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    padding: 12px;
+    border-radius: 16px;
+    border: 3px solid var(--leaf);
+    color: var(--moss-dark);
+    background: #fff;
+    margin-bottom: 4px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .answer-input:focus {
+    outline: 3px solid var(--sky);
+    outline-offset: 2px;
+  }
+
+  .answer-input.state-correct {
+    border-color: var(--moss);
+    background: #e9f6ee;
+  }
+
+  .answer-input.state-wrong {
+    border-color: var(--berry);
+    background: #fbeceb;
+  }
+
+  .feedback {
+    min-height: 26px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 15px;
+    margin: 6px 0 14px;
+  }
+
+  .feedback.correct { color: var(--moss-dark); }
+  .feedback.wrong { color: var(--berry); }
+
+  .numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .num-btn {
+    padding: 14px 0;
+    border-radius: 14px;
+    border: none;
+    background: var(--leaf-pale);
+    color: var(--moss-dark);
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.08s ease, background 0.1s ease;
+  }
+
+  .num-btn:active { transform: scale(0.93); background: var(--leaf); }
+
+  .check-btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 16px;
+    background: var(--sun);
+    color: var(--moss-dark);
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 20px -8px rgba(216, 148, 38, 0.55);
+    transition: transform 0.1s ease;
+  }
+
+  .check-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  .check-btn:not(:disabled):active { transform: scale(0.98); }
+
+  .score-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--moss-dark);
+  }
+
+  .quit-link {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 16px;
+    font-size: 13px;
+    color: #928c73;
+    background: none;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 6px;
+  }
+
+  /* ---- Result screen ---- */
+
+  .result-mascot {
+    font-size: 60px;
+    text-align: center;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .result-title {
+    text-align: center;
+    font-size: 24px;
+    color: var(--moss-dark);
+    margin: 0 0 6px;
+  }
+
+  .result-sub {
+    text-align: center;
+    font-size: 15px;
+    color: #6b6552;
+    margin: 0 0 10px;
+  }
+
+  .badge-new-best {
+    display: block;
+    text-align: center;
+    background: var(--sun);
+    color: var(--moss-dark);
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    border-radius: 999px;
+    padding: 6px 10px;
+    margin: 0 auto 14px;
+    width: fit-content;
+  }
+
+  .stars {
+    text-align: center;
+    font-size: 26px;
+    letter-spacing: 4px;
+    margin-bottom: 18px;
+  }
+
+  .stat-grid {
+    display: flex;
+    justify-content: space-around;
+    background: var(--leaf-pale);
+    border-radius: 16px;
+    padding: 14px 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 10px 0;
+  }
+
+  .stat {
+    text-align: center;
+    min-width: 70px;
+  }
+
+  .stat-num {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 22px;
+    color: var(--moss-dark);
+    font-weight: 700;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: #6b6552;
+    font-weight: 700;
+  }
+
+  .insight-box {
+    background: #fff8ea;
+    border: 2px solid var(--sun);
+    border-radius: 16px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--bark);
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+
+  /* ---- Progress screen ---- */
+
+  .bar-row {
+    display: grid;
+    grid-template-columns: 84px 1fr 44px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .bar-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--moss-dark);
+  }
+
+  .bar-track {
+    height: 12px;
+    background: var(--leaf-pale);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: var(--moss);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+
+  .bar-pct {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--moss-dark);
+    text-align: right;
+  }
+
+  ul.plain-list {
+    list-style: none;
+    margin: 0 0 4px;
+    padding: 0;
+  }
+
+  ul.plain-list li {
+    background: var(--leaf-pale);
+    border-radius: 12px;
+    padding: 9px 12px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--bark);
+    font-weight: 600;
+  }
+
+  ul.plain-list li.empty-note {
+    color: #8b8367;
+    font-weight: 500;
+    font-style: italic;
+    background: transparent;
+    padding-left: 0;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SETUP SCREEN -->
+  <section class="screen active" id="screen-setup" aria-label="Nastavení hry">
+    <div class="mascot-row"><span class="mascot" aria-hidden="true">🐿️</span></div>
+    <h1 class="title">Matematický les</h1>
+    <p class="subtitle">Pomoz veverce Oříškovi nasbírat žaludy — počítej příklady a sbírej body.</p>
+
+    <div class="field-label" id="ops-label">Co budeme počítat?</div>
+    <div class="chip-row" role="radiogroup" aria-labelledby="ops-label">
+      <button class="chip" data-op="add" role="radio" aria-pressed="false">+</button>
+      <button class="chip" data-op="sub" role="radio" aria-pressed="false">−</button>
+      <button class="chip" data-op="mul" role="radio" aria-pressed="false">×</button>
+      <button class="chip" data-op="div" role="radio" aria-pressed="false">÷</button>
+    </div>
+    <button class="chip chip-mix" data-op="mix" role="radio" aria-pressed="true">
+      Kombinace všech
+      <span class="mix-symbols">+ − × ÷</span>
+    </button>
+
+    <div class="field-label" id="diff-label">Jak těžké to má být?</div>
+    <div class="toggle-row" role="group" aria-labelledby="diff-label">
+      <button class="toggle-btn" data-diff="easy" aria-pressed="true">Lehčí čísla</button>
+      <button class="toggle-btn" data-diff="hard" aria-pressed="false">Těžší čísla</button>
+    </div>
+
+    <button class="primary-btn" id="start-btn">Začít počítat</button>
+    <button class="secondary-btn" id="view-progress-btn">Zobrazit můj pokrok</button>
+    <p class="hint">Jedno kolo má 10 příkladů.</p>
+  </section>
+
+  <!-- PRACTICE SCREEN -->
+  <section class="screen" id="screen-play" aria-label="Procvičování">
+    <div class="top-bar">
+      <span id="question-counter">Otázka 1 z 10</span>
+      <div class="acorn-track" id="acorn-track" aria-hidden="true"></div>
+    </div>
+
+    <div class="question-box">
+      <div class="question-text" id="question-text" aria-live="polite">7 × 6 = ?</div>
+    </div>
+
+    <input class="answer-input" id="answer-input" type="text" inputmode="numeric"
+           aria-label="Tvoje odpověď" readonly value="">
+
+    <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+
+    <div class="numpad" id="numpad">
+      <button class="num-btn" data-key="1">1</button>
+      <button class="num-btn" data-key="2">2</button>
+      <button class="num-btn" data-key="3">3</button>
+      <button class="num-btn" data-key="4">4</button>
+      <button class="num-btn" data-key="5">5</button>
+      <button class="num-btn" data-key="6">6</button>
+      <button class="num-btn" data-key="7">7</button>
+      <button class="num-btn" data-key="8">8</button>
+      <button class="num-btn" data-key="9">9</button>
+      <button class="num-btn" data-key="back">⌫</button>
+      <button class="num-btn" data-key="0">0</button>
+      <button class="num-btn" data-key="clear">C</button>
+    </div>
+
+    <button class="check-btn" id="check-btn">Zkontrolovat</button>
+
+    <div class="score-bar">
+      <span id="score-display">Skóre: 0</span>
+      <span id="streak-display"></span>
+    </div>
+
+    <button class="quit-link" id="quit-btn">Ukončit a vrátit se do nabídky</button>
+  </section>
+
+  <!-- RESULT SCREEN -->
+  <section class="screen" id="screen-result" aria-label="Výsledek">
+    <span class="result-mascot" id="result-mascot" aria-hidden="true">🐿️</span>
+    <h2 class="result-title" id="result-title">Skvělá práce!</h2>
+    <p class="result-sub" id="result-sub">Nasbíral(a) jsi 8 z 10 žaludů.</p>
+    <div class="badge-new-best" id="badge-new-best" style="display:none;">🏆 Nové nejlepší skóre!</div>
+    <div class="stars" id="result-stars" aria-hidden="true"></div>
+
+    <div class="stat-grid">
+      <div class="stat">
+        <div class="stat-num" id="stat-correct">8</div>
+        <div class="stat-label">SPRÁVNĚ</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="stat-streak">4</div>
+        <div class="stat-label">NEJDELŠÍ SÉRIE</div>
+      </div>
+    </div>
+
+    <div class="insight-box" id="result-insight" style="display:none;"></div>
+
+    <button class="primary-btn" id="again-btn">Hrát znovu</button>
+    <button class="secondary-btn" id="result-progress-btn">Zobrazit můj pokrok</button>
+    <button class="quit-link" id="settings-btn">Změnit nastavení</button>
+  </section>
+
+  <!-- PROGRESS SCREEN -->
+  <section class="screen" id="screen-progress" aria-label="Můj pokrok">
+    <h2 class="title">Můj pokrok</h2>
+
+    <div class="stat-grid">
+      <div class="stat">
+        <div class="stat-num" id="prog-rounds">0</div>
+        <div class="stat-label">ODEHRANÁ KOLA</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="prog-acorns">0</div>
+        <div class="stat-label">ŽALUDY CELKEM</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="prog-best-score">0</div>
+        <div class="stat-label">NEJLEPŠÍ SKÓRE</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="prog-best-streak">0</div>
+        <div class="stat-label">NEJDELŠÍ SÉRIE</div>
+      </div>
+    </div>
+
+    <div class="insight-box" id="progress-insight">Zatím nemáme dost dat.</div>
+
+    <div class="field-label">Úspěšnost podle operace</div>
+    <div id="accuracy-op-list"></div>
+
+    <div class="field-label">Úspěšnost podle obtížnosti</div>
+    <div id="accuracy-diff-list"></div>
+
+    <div class="field-label">Kde nejčastěji chybuje</div>
+    <ul class="plain-list" id="mistake-list"></ul>
+
+    <div class="field-label">Poslední kola</div>
+    <ul class="plain-list" id="history-list"></ul>
+
+    <button class="secondary-btn" id="progress-back-btn">Zpět do nabídky</button>
+    <button class="quit-link" id="reset-progress-btn">Smazat uložený pokrok</button>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var TOTAL_QUESTIONS = 10;
+  var STORAGE_KEY = "progress";
+
+  var OP_LABELS = { add: "Sčítání", sub: "Odčítání", mul: "Násobení", div: "Dělení", mix: "Kombinace" };
+  var DIFF_LABELS = { easy: "lehčí", hard: "těžší" };
+
+  var state = {
+    opMode: "mix",
+    difficulty: "easy",
+    round: [],
+    index: 0,
+    score: 0,
+    streak: 0,
+    maxStreak: 0,
+    results: [],
+    currentAnswer: "",
+    locked: false,
+    progress: null
+  };
+
+  // ---------- persistence ----------
+  function defaultProgress() {
+    return {
+      totalRounds: 0,
+      totalAcorns: 0,
+      bestScore: 0,
+      bestStreak: 0,
+      history: [],
+      accuracy: {
+        add: { correct: 0, total: 0 },
+        sub: { correct: 0, total: 0 },
+        mul: { correct: 0, total: 0 },
+        div: { correct: 0, total: 0 },
+        easy: { correct: 0, total: 0 },
+        hard: { correct: 0, total: 0 }
+      },
+      mistakes: {}
+    };
+  }
+
+  function loadProgress() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        var base = defaultProgress();
+        return Object.assign(base, parsed, {
+          accuracy: Object.assign(base.accuracy, parsed.accuracy || {}),
+          mistakes: parsed.mistakes || {}
+        });
+      }
+    } catch (e) {
+      /* no saved progress yet, or storage unavailable (e.g. private browsing) */
+    }
+    return defaultProgress();
+  }
+
+  function saveProgress(progress) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    } catch (e) {
+      console.error("Nepodařilo se uložit pokrok:", e);
+    }
+  }
+
+  function clearProgress() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      /* nothing stored yet */
+    }
+    state.progress = defaultProgress();
+  }
+
+  // ---------- element refs ----------
+  var screens = {
+    setup: document.getElementById("screen-setup"),
+    play: document.getElementById("screen-play"),
+    result: document.getElementById("screen-result"),
+    progress: document.getElementById("screen-progress")
+  };
+
+  var opChips = document.querySelectorAll("[data-op]");
+  var toggles = document.querySelectorAll(".toggle-btn");
+  var startBtn = document.getElementById("start-btn");
+  var quitBtn = document.getElementById("quit-btn");
+  var againBtn = document.getElementById("again-btn");
+  var settingsBtn = document.getElementById("settings-btn");
+  var checkBtn = document.getElementById("check-btn");
+  var numpad = document.getElementById("numpad");
+  var viewProgressBtn = document.getElementById("view-progress-btn");
+  var resultProgressBtn = document.getElementById("result-progress-btn");
+  var progressBackBtn = document.getElementById("progress-back-btn");
+  var resetProgressBtn = document.getElementById("reset-progress-btn");
+
+  var questionCounter = document.getElementById("question-counter");
+  var acornTrack = document.getElementById("acorn-track");
+  var questionText = document.getElementById("question-text");
+  var answerInput = document.getElementById("answer-input");
+  var feedback = document.getElementById("feedback");
+  var scoreDisplay = document.getElementById("score-display");
+  var streakDisplay = document.getElementById("streak-display");
+
+  var resultMascot = document.getElementById("result-mascot");
+  var resultTitle = document.getElementById("result-title");
+  var resultSub = document.getElementById("result-sub");
+  var resultStars = document.getElementById("result-stars");
+  var statCorrect = document.getElementById("stat-correct");
+  var statStreak = document.getElementById("stat-streak");
+  var badgeNewBest = document.getElementById("badge-new-best");
+  var resultInsight = document.getElementById("result-insight");
+
+  // ---------- helpers ----------
+  function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function showScreen(name) {
+    Object.keys(screens).forEach(function (key) {
+      screens[key].classList.toggle("active", key === name);
+    });
+  }
+
+  function generateQuestion(op, difficulty) {
+    var a, b, answer, text;
+    if (op === "add") {
+      if (difficulty === "easy") {
+        a = randInt(1, 20); b = randInt(1, 20);
+      } else {
+        a = randInt(10, 90); b = randInt(10, 100 - a);
+      }
+      answer = a + b;
+      text = a + " + " + b + " = ?";
+    } else if (op === "sub") {
+      if (difficulty === "easy") {
+        a = randInt(1, 20); b = randInt(0, a);
+      } else {
+        a = randInt(20, 100); b = randInt(0, a);
+      }
+      answer = a - b;
+      text = a + " − " + b + " = ?";
+    } else if (op === "mul") {
+      if (difficulty === "easy") {
+        a = randInt(1, 5); b = randInt(1, 10);
+      } else {
+        a = randInt(2, 10); b = randInt(2, 10);
+      }
+      answer = a * b;
+      text = a + " × " + b + " = ?";
+    } else { // div
+      var divisor, quotient, dividend;
+      if (difficulty === "easy") {
+        divisor = randInt(1, 5); quotient = randInt(1, 10);
+      } else {
+        divisor = randInt(2, 10); quotient = randInt(2, 10);
+      }
+      dividend = divisor * quotient;
+      answer = quotient;
+      text = dividend + " ÷ " + divisor + " = ?";
+    }
+    return { text: text, answer: answer, op: op };
+  }
+
+  function buildRound() {
+    var opsArr = state.opMode === "mix" ? ["add", "sub", "mul", "div"] : [state.opMode];
+    var round = [];
+    for (var i = 0; i < TOTAL_QUESTIONS; i++) {
+      var op = opsArr[randInt(0, opsArr.length - 1)];
+      round.push(generateQuestion(op, state.difficulty));
+    }
+    return round;
+  }
+
+  function buildAcornTrack() {
+    acornTrack.innerHTML = "";
+    for (var i = 0; i < TOTAL_QUESTIONS; i++) {
+      var dot = document.createElement("div");
+      dot.className = "acorn-dot";
+      acornTrack.appendChild(dot);
+    }
+  }
+
+  function updateAcornTrack() {
+    var dots = acornTrack.querySelectorAll(".acorn-dot");
+    state.results.forEach(function (res, i) {
+      dots[i].classList.remove("correct", "wrong");
+      if (res === "correct") { dots[i].classList.add("correct"); dots[i].textContent = "🌰"; }
+      else if (res === "wrong") { dots[i].classList.add("wrong"); dots[i].textContent = "✕"; }
+    });
+  }
+
+  function renderQuestion() {
+    var q = state.round[state.index];
+    questionCounter.textContent = "Otázka " + (state.index + 1) + " z " + TOTAL_QUESTIONS;
+    questionText.textContent = q.text;
+    state.currentAnswer = "";
+    answerInput.value = "";
+    answerInput.classList.remove("state-correct", "state-wrong");
+    feedback.textContent = "";
+    feedback.className = "feedback";
+    scoreDisplay.textContent = "Skóre: " + state.score;
+    streakDisplay.textContent = state.streak >= 3 ? "Série: " + state.streak + " 🔥" : "";
+    checkBtn.disabled = false;
+    checkBtn.textContent = "Zkontrolovat";
+    state.locked = false;
+  }
+
+  function startRound() {
+    state.round = buildRound();
+    state.index = 0;
+    state.score = 0;
+    state.streak = 0;
+    state.maxStreak = 0;
+    state.results = [];
+    buildAcornTrack();
+    renderQuestion();
+    showScreen("play");
+  }
+
+  var praiseWords = ["Skvěle!", "Přesně tak!", "Výborně!", "Paráda!", "Super!"];
+
+  function handleCheck() {
+    if (state.locked) return;
+    if (state.currentAnswer === "") {
+      feedback.textContent = "Nejdřív napiš číslo.";
+      feedback.className = "feedback wrong";
+      return;
+    }
+    state.locked = true;
+    checkBtn.disabled = true;
+
+    var q = state.round[state.index];
+    var given = parseInt(state.currentAnswer, 10);
+    var correct = given === q.answer;
+
+    if (correct) {
+      state.score++;
+      state.streak++;
+      state.maxStreak = Math.max(state.maxStreak, state.streak);
+      state.results.push("correct");
+      answerInput.classList.add("state-correct");
+      feedback.textContent = praiseWords[randInt(0, praiseWords.length - 1)] + " ⭐";
+      feedback.className = "feedback correct";
+    } else {
+      state.streak = 0;
+      state.results.push("wrong");
+      answerInput.classList.add("state-wrong");
+      feedback.textContent = "Skoro! Správně je " + q.answer + ".";
+      feedback.className = "feedback wrong";
+    }
+
+    updateAcornTrack();
+    scoreDisplay.textContent = "Skóre: " + state.score;
+    streakDisplay.textContent = state.streak >= 3 ? "Série: " + state.streak + " 🔥" : "";
+
+    var delay = correct ? 900 : 1700;
+    setTimeout(function () {
+      state.index++;
+      if (state.index >= TOTAL_QUESTIONS) {
+        finishRound();
+      } else {
+        renderQuestion();
+      }
+    }, delay);
+  }
+
+  // ---------- progress bookkeeping ----------
+  function recordMistake(p, q) {
+    var key = q.text.replace(" = ?", "") + " = " + q.answer;
+    p.mistakes[key] = (p.mistakes[key] || 0) + 1;
+    var keys = Object.keys(p.mistakes);
+    if (keys.length > 50) {
+      keys.sort(function (a, b) { return p.mistakes[a] - p.mistakes[b]; });
+      var toRemove = keys.slice(0, keys.length - 50);
+      toRemove.forEach(function (k) { delete p.mistakes[k]; });
+    }
+  }
+
+  function updateProgressAfterRound() {
+    var p = state.progress;
+    var prevBestScore = p.bestScore;
+
+    p.totalRounds++;
+    p.totalAcorns += state.score;
+    p.bestScore = Math.max(p.bestScore, state.score);
+    p.bestStreak = Math.max(p.bestStreak, state.maxStreak);
+
+    state.round.forEach(function (q, i) {
+      var res = state.results[i];
+      var opStats = p.accuracy[q.op];
+      var diffStats = p.accuracy[state.difficulty];
+      opStats.total++;
+      diffStats.total++;
+      if (res === "correct") {
+        opStats.correct++;
+        diffStats.correct++;
+      } else {
+        recordMistake(p, q);
+      }
+    });
+
+    p.history.unshift({
+      date: new Date().toISOString(),
+      op: state.opMode,
+      difficulty: state.difficulty,
+      score: state.score
+    });
+    p.history = p.history.slice(0, 10);
+
+    state.newBest = state.score > prevBestScore;
+    saveProgress(p);
+  }
+
+  function getWeakestOp(p) {
+    var weakest = null, weakestPct = 101;
+    ["add", "sub", "mul", "div"].forEach(function (op) {
+      var s = p.accuracy[op];
+      if (s.total >= 5) {
+        var pct = Math.round((s.correct / s.total) * 100);
+        if (pct < weakestPct) { weakestPct = pct; weakest = op; }
+      }
+    });
+    if (weakest && weakestPct < 80) return { op: weakest, pct: weakestPct, label: OP_LABELS[weakest] };
+    return null;
+  }
+
+  function getTopMistake(p) {
+    var keys = Object.keys(p.mistakes).filter(function (k) { return p.mistakes[k] >= 2; });
+    if (keys.length === 0) return null;
+    keys.sort(function (a, b) { return p.mistakes[b] - p.mistakes[a]; });
+    return { text: keys[0], count: p.mistakes[keys[0]] };
+  }
+
+  function finishRound() {
+    updateProgressAfterRound();
+    showResult();
+  }
+
+  function showResult() {
+    var score = state.score;
+    var title, mascot;
+    if (score >= 9) { title = "Jsi mistr počtů!"; mascot = "🐿️🏆"; }
+    else if (score >= 7) { title = "Skvělá práce!"; mascot = "🐿️🎉"; }
+    else if (score >= 5) { title = "Dobrá práce, jde to!"; mascot = "🐿️🙂"; }
+    else { title = "Zkusíme to znovu?"; mascot = "🐿️💪"; }
+
+    resultMascot.textContent = mascot;
+    resultTitle.textContent = title;
+    resultSub.textContent = "Nasbíral(a) jsi " + score + " z " + TOTAL_QUESTIONS + " žaludů.";
+    resultStars.textContent = "⭐".repeat(score) + "☆".repeat(TOTAL_QUESTIONS - score);
+    statCorrect.textContent = score;
+    statStreak.textContent = state.maxStreak;
+
+    badgeNewBest.style.display = state.newBest ? "block" : "none";
+
+    var tips = [];
+    var weakest = getWeakestOp(state.progress);
+    if (weakest) tips.push("Nejvíc potíží ti dělá: " + weakest.label + " (" + weakest.pct + " % úspěšnost).");
+    var topMistake = getTopMistake(state.progress);
+    if (topMistake) tips.push("Nejčastěji sis spletl(a): " + topMistake.text + " (" + topMistake.count + "×).");
+
+    if (tips.length > 0) {
+      resultInsight.style.display = "block";
+      resultInsight.textContent = tips.join(" ");
+    } else {
+      resultInsight.style.display = "none";
+    }
+
+    showScreen("result");
+  }
+
+  // ---------- progress screen rendering ----------
+  function buildBarRow(label, pct, total) {
+    var row = document.createElement("div");
+    row.className = "bar-row";
+
+    var labelEl = document.createElement("div");
+    labelEl.className = "bar-label";
+    labelEl.textContent = label;
+
+    var track = document.createElement("div");
+    track.className = "bar-track";
+    var fill = document.createElement("div");
+    fill.className = "bar-fill";
+    fill.style.width = (total ? pct : 0) + "%";
+    track.appendChild(fill);
+
+    var pctEl = document.createElement("div");
+    pctEl.className = "bar-pct";
+    pctEl.textContent = total ? pct + " %" : "—";
+
+    row.appendChild(labelEl);
+    row.appendChild(track);
+    row.appendChild(pctEl);
+    return row;
+  }
+
+  function renderProgressScreen() {
+    var p = state.progress;
+
+    document.getElementById("prog-rounds").textContent = p.totalRounds;
+    document.getElementById("prog-acorns").textContent = p.totalAcorns;
+    document.getElementById("prog-best-score").textContent = p.bestScore;
+    document.getElementById("prog-best-streak").textContent = p.bestStreak;
+
+    var insight = document.getElementById("progress-insight");
+    var weakest = getWeakestOp(p);
+    if (weakest) {
+      insight.textContent = "Nejvíc potíží aktuálně dělá: " + weakest.label + " (" + weakest.pct + " % úspěšnost). Zkus na to zaměřit příští kolo.";
+    } else if (p.totalRounds === 0) {
+      insight.textContent = "Zatím jsi neodehrál(a) žádné kolo. Pusť se do prvního!";
+    } else {
+      insight.textContent = "Zatím si vedeš vyrovnaně ve všech oblastech. Skvělá práce!";
+    }
+
+    var accOpList = document.getElementById("accuracy-op-list");
+    accOpList.innerHTML = "";
+    ["add", "sub", "mul", "div"].forEach(function (op) {
+      var s = p.accuracy[op];
+      var pct = s.total ? Math.round((s.correct / s.total) * 100) : 0;
+      accOpList.appendChild(buildBarRow(OP_LABELS[op], pct, s.total));
+    });
+
+    var accDiffList = document.getElementById("accuracy-diff-list");
+    accDiffList.innerHTML = "";
+    [["easy", "Lehčí čísla"], ["hard", "Těžší čísla"]].forEach(function (pair) {
+      var s = p.accuracy[pair[0]];
+      var pct = s.total ? Math.round((s.correct / s.total) * 100) : 0;
+      accDiffList.appendChild(buildBarRow(pair[1], pct, s.total));
+    });
+
+    var mistakeList = document.getElementById("mistake-list");
+    mistakeList.innerHTML = "";
+    var mistakeEntries = Object.keys(p.mistakes)
+      .map(function (k) { return [k, p.mistakes[k]]; })
+      .filter(function (e) { return e[1] >= 2; })
+      .sort(function (a, b) { return b[1] - a[1]; })
+      .slice(0, 5);
+    if (mistakeEntries.length === 0) {
+      mistakeList.innerHTML = '<li class="empty-note">Zatím žádné opakované chyby. Skvělé!</li>';
+    } else {
+      mistakeEntries.forEach(function (e) {
+        var li = document.createElement("li");
+        li.textContent = e[0] + " — spletl(a) sis to " + e[1] + "×";
+        mistakeList.appendChild(li);
+      });
+    }
+
+    var historyList = document.getElementById("history-list");
+    historyList.innerHTML = "";
+    if (p.history.length === 0) {
+      historyList.innerHTML = '<li class="empty-note">Zatím jsi neodehrál(a) žádné kolo.</li>';
+    } else {
+      p.history.forEach(function (h) {
+        var li = document.createElement("li");
+        var d = new Date(h.date);
+        var dateStr = d.toLocaleDateString("cs-CZ", { day: "numeric", month: "numeric" });
+        li.textContent = dateStr + " — " + OP_LABELS[h.op] + " (" + DIFF_LABELS[h.difficulty] + "): " + h.score + "/10";
+        historyList.appendChild(li);
+      });
+    }
+  }
+
+  // ---------- event wiring ----------
+  opChips.forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      opChips.forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
+      chip.setAttribute("aria-pressed", "true");
+      state.opMode = chip.dataset.op;
+    });
+  });
+
+  toggles.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      toggles.forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
+      btn.setAttribute("aria-pressed", "true");
+      state.difficulty = btn.dataset.diff;
+    });
+  });
+
+  startBtn.addEventListener("click", startRound);
+  againBtn.addEventListener("click", startRound);
+  settingsBtn.addEventListener("click", function () { showScreen("setup"); });
+  quitBtn.addEventListener("click", function () { showScreen("setup"); });
+
+  viewProgressBtn.addEventListener("click", function () { renderProgressScreen(); showScreen("progress"); });
+  resultProgressBtn.addEventListener("click", function () { renderProgressScreen(); showScreen("progress"); });
+  progressBackBtn.addEventListener("click", function () { showScreen("setup"); });
+
+  resetProgressBtn.addEventListener("click", function () {
+    var ok = window.confirm("Opravdu chceš smazat celý uložený pokrok? Tuto akci nejde vrátit zpět.");
+    if (!ok) return;
+    clearProgress();
+    renderProgressScreen();
+  });
+
+  numpad.addEventListener("click", function (e) {
+    var btn = e.target.closest(".num-btn");
+    if (!btn || state.locked) return;
+    var key = btn.dataset.key;
+    if (key === "back") {
+      state.currentAnswer = state.currentAnswer.slice(0, -1);
+    } else if (key === "clear") {
+      state.currentAnswer = "";
+    } else if (state.currentAnswer.length < 4) {
+      state.currentAnswer += key;
+    }
+    answerInput.value = state.currentAnswer;
+  });
+
+  checkBtn.addEventListener("click", handleCheck);
+
+  document.addEventListener("keydown", function (e) {
+    if (!screens.play.classList.contains("active") || state.locked) return;
+    if (e.key >= "0" && e.key <= "9") {
+      if (state.currentAnswer.length < 4) {
+        state.currentAnswer += e.key;
+        answerInput.value = state.currentAnswer;
+      }
+    } else if (e.key === "Backspace") {
+      state.currentAnswer = state.currentAnswer.slice(0, -1);
+      answerInput.value = state.currentAnswer;
+    } else if (e.key === "Enter") {
+      handleCheck();
+    }
+  });
+
+  // ---------- init ----------
+  state.progress = loadProgress();
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () {
+        /* offline caching just won't be available - app still works online */
+      });
+    });
+  }
+
+})();
+</script>
+
+</body>
+</html>
